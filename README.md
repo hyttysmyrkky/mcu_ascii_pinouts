@@ -7,3 +7,5 @@ If you find a mistake in a diagram, please create an issue or pull request, befo
 
 Currently diagrams exist for (see the .txt files):
 - NodeMCU
+- ESP-12E/F
+- Wemos D1 mini
