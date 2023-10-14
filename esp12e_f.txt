@@ -1,0 +1,54 @@
+/*
+                 +----------------------+
+         Arduino-|                      |   Arduino-
+          IDE or |       ESP-12E/F      |   IDE or
+            GPIO |                      |   GPIO
+                 |    +------------+    |    
+(sleep wake 16--)|RST |  ESP8266   |TXD0|   1
++----------- A0  |ADC |            |RXD0|   3
+| VCC---10kΩ---  |EN  |            |   5|   5       (I2C_SCL soft) -----------------------------------
+|   +------- 16  |16  |            |   4|   4  PWM  (I2C_SDA soft) -----------------------------------
+|   | +----- 14  |14  |            |   0|   0 --GND(flashing) or --10kΩ--VCC(normal boot)
+|   | | +--- 12  |12  |            |   2|   2 (internal pullup for boot) (LED) (I2C_SDA?)
+|   | | | +- 13  |13  |            |  15|  15 --10kΩ--GND (HSPI_CS)
+|   | | | |      |VCC +------------+ GND|  --µF--VCC
+|   | | | |      |        9  10         |
+|   | | | |      +----------------------+
+|   | | | |       |   |   |   |   |   |
+|   | | | |      11   7   9  10   8   6
+|   | | | |       |   |   |   |   |   +----- SPI_CLK          \
+|   | | | |       |   |   |   |   +--------- SPI_MOSI          |
+|   | | | |       |   |   |   +------------- 10 (high at boot) | Used to communicate with SPI flash,
+|   | | | |       |   |   +----------------- 9 (high at boot)  | thus not really externally usable.
+|   | | | |       |   +--------------------- SPI_MISO          |
+|   | | | |       +------------------------- SPI_CS0          /
+|   | | | |
+|   | | | +------------------------------- 13       HSPI_MOSI ----------------------------------------
+|   | | +--------------------------------- 12  PWM  HSPI_MISO ----------------------------------------
+|   | +----------------------------------- 14  PWM  HSPI_CLK (I2C_SCL?) ------------------------------
+|   +------------------------------------- 16       (--RST for deep sleep wake-up (low), high at boot)
+|
++-------------------------------------------- ADC (0.0--1.0 V, 10-bit, scope 0--1024) ----------------
+
+                                            Use these pins first:
+                                                GPIO 5  (good for controlling relays etc.)
+                                                GPIO 4  (good for controlling relays etc.)
+                                                GPIO 14
+                                                GPIO 12
+                                                GPIO 13
+
+EN  :   CHIP_EN = Chip Enable. High: On, chip works properly. Low: Off, small current consumed.
+VCC :   3.3 V
+RST :   Normally floating; Pull down to reset.
+
+Boot log (Baud 74880, otherwise usually 115200):
+    rst_cause : 
+                Value   Meaning
+                1       power-on
+                2       external-reset
+                3       hardware watchdog-reset
+    The first parameter of boot_mode:
+                Value                       Meaning
+                1 (eg. boot mode:(1,x))     UART download mode (download FW into Flash)
+                2 (eg. boot mode:(3,x))     Boot from flash mode
+*/
